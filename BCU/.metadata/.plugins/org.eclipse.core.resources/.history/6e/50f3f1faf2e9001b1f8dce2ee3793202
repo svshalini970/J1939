@@ -1,0 +1,288 @@
+#include <switch.H>
+#include "stm32l4xx_hal.h"
+#include "main.h"
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim6;
+ uint8_t count=5;
+ uint8_t count1=5;
+
+extern uint8_t key_count_on=1;
+extern uint8_t key_count_off=0;
+void sendMsg_KEYINFO(J1939_MESSAGE *Message)
+{
+
+	J1939_MESSAGE _msgKEYINFO;
+	_msgKEYINFO=*Message;
+	_msgKEYINFO.Mxe.DataPage = 0;
+	_msgKEYINFO.Mxe.Priority = 0x01;
+	_msgKEYINFO.Mxe.DestinationAddress = 0x33;//changed from 33 to 31//destination is all
+	_msgKEYINFO.Mxe.DataLength = 8;
+	_msgKEYINFO.Mxe.PDUFormat = 0xf1;
+	_msgKEYINFO.Mxe.SourceAddress = 0x33;
+
+	while (J1939_Send_Message(&_msgKEYINFO)!= RC_SUCCESS);
+
+
+}
+
+void sendMsg_IGNITION_CMD(J1939_MESSAGE *Message)
+{
+
+	J1939_MESSAGE _msgIGNITION_CMD;
+	_msgIGNITION_CMD=*Message;
+	_msgIGNITION_CMD.Mxe.DataPage = 0;
+	_msgIGNITION_CMD.Mxe.Priority = 0x02;
+	_msgIGNITION_CMD.Mxe.DestinationAddress = 0x11;
+	_msgIGNITION_CMD.Mxe.DataLength = 1;
+	_msgIGNITION_CMD.Mxe.PDUFormat = 0x17;
+	_msgIGNITION_CMD.Mxe.SourceAddress = 0x33;
+
+	while (J1939_Send_Message(&_msgIGNITION_CMD)!= RC_SUCCESS);
+	//J1939_TransmitMessages();
+
+
+
+}
+
+
+
+void sendMsg_MOTORCONTROLLERSTATUS(J1939_MESSAGE *Message)
+{
+	J1939_MESSAGE _msgMOTORCONTROLLERSTATUS;
+	_msgMOTORCONTROLLERSTATUS =*Message;
+
+	_msgMOTORCONTROLLERSTATUS.Mxe.DataPage = 0;
+	_msgMOTORCONTROLLERSTATUS.Mxe.Priority = 0x03;
+	_msgMOTORCONTROLLERSTATUS.Mxe.DestinationAddress = 0x00;//all
+	_msgMOTORCONTROLLERSTATUS.Mxe.DataLength = 1;
+	_msgMOTORCONTROLLERSTATUS.Mxe.PDUFormat = 0xF2;
+	_msgMOTORCONTROLLERSTATUS.Mxe.SourceAddress = 0x11;
+
+	while (J1939_Send_Message( &_msgMOTORCONTROLLERSTATUS)!= RC_SUCCESS);
+
+
+}
+
+
+
+
+
+void sendMsg_SWITCHINFO(J1939_MESSAGE *Message)
+{
+
+	J1939_MESSAGE _msgSWITCHINFO;
+	_msgSWITCHINFO=*Message;
+	_msgSWITCHINFO.Mxe.DataPage = 0;
+	_msgSWITCHINFO.Mxe.Priority = 0x03;
+	_msgSWITCHINFO.Mxe.DestinationAddress = 0x22;
+	_msgSWITCHINFO.Mxe.DataLength = 8;
+	_msgSWITCHINFO.Mxe.PDUFormat = 0x15;
+	_msgSWITCHINFO.Mxe.SourceAddress = 0x33;
+	while (J1939_Send_Message( &_msgSWITCHINFO) != RC_SUCCESS);
+	HAL_Delay(50);
+
+}
+
+
+void readMsg( )
+{
+
+	J1939_MESSAGE _msg;
+
+	if(J1939_Read_Message(&_msg) == RC_SUCCESS)
+	{
+		//BMS STATUS
+		if(_msg.Mxe.PGN == 0xF422)
+		{
+			uint8_t a;
+			a++;
+
+		}
+		//MOTORCONTROLLER STATUS
+		else if(_msg.Mxe.PGN == 0xF233)
+		{
+
+			controller_info_v.MotorcontrollerStatusvar[0]=_msg.Mxe.Data[0];
+
+		}
+		//VCU STATUS
+		else if(_msg.Mxe.PGN == 0X100)
+		{
+			//flag2=0;
+
+
+		}
+		else
+			;
+	}
+
+}
+
+
+void call_switches()
+{
+	if(vechile_status)
+
+	{
+
+		//		  HAL_GPIO_WritePin(hb_c_GPIO_Port, hb_c_Pin, switch_info_v.hb);
+		//		  HAL_GPIO_WritePin(hb_c_GPIO_Port, hb_c_Pin, switch_info_v.hb);
+		//		  HAL_GPIO_WritePin(hb_c_GPIO_Port, hb_c_Pin, switch_info_v.hb);
+
+
+
+		switch_info_v.switches.navb=HAL_GPIO_ReadPin(navb_GPIO_Port, navb_Pin)?0:1;
+		switch_info_v.switches.navl=HAL_GPIO_ReadPin(navl_GPIO_Port, navl_Pin)?0:1;
+		switch_info_v.switches.navr=HAL_GPIO_ReadPin(navr_GPIO_Port, navr_Pin)?0:1;
+		switch_info_v.switches.navm=HAL_GPIO_ReadPin(navm_GPIO_Port, navm_Pin)?0:1;
+		switch_info_v.switches.navt=HAL_GPIO_ReadPin(navt_GPIO_Port, navt_Pin)?0:1;
+		switch_info_v.switches.ig  =HAL_GPIO_ReadPin(ig_GPIO_Port, ig_Pin)?0:1;
+
+
+
+		switch_info_v.switches.kill=HAL_GPIO_ReadPin(killswitch_GPIO_Port, killswitch_Pin)?1:0;
+		//switch_info_v.=HAL_GPIO_ReadPin(ig_GPIO_Port, ig_Pin)?0:1;
+
+		switch_info_v.switches.hb=HAL_GPIO_ReadPin(hb_GPIO_Port, hb_Pin)?0:1;
+		HAL_GPIO_WritePin(hb_c_GPIO_Port, hb_c_Pin, switch_info_v.switches.hb);
+
+		switch_info_v.switches.lindicator=HAL_GPIO_ReadPin(lindicator_GPIO_Port, lindicator_Pin)?0:1;
+		// HAL_GPIO_WritePin(lindicator_c_GPIO_Port, lindicator_c_Pin, switch_info_v.switches.lindicator);
+		while(switch_info_v.switches.lindicator)
+		{
+			while(count<=0)
+			{
+				//				  count--;
+				//				  HAL_GPIO_WritePin(lindicator_c_GPIO_Port, lindicator_c_Pin, switch_info_v.switches.lindicator);
+				//				  HAL_Delay(1000);
+				//				  HAL_GPIO_WritePin(lindicator_c_GPIO_Port, lindicator_c_Pin,0);
+				//				  HAL_Delay(1000);
+				HAL_GPIO_TogglePin(lindicator_c_GPIO_Port, lindicator_c_Pin);
+				//				  HAL_Delay(1000);
+				break;
+
+
+			}
+
+			if(count==0)
+			{
+				count=5;
+
+
+			}
+			count--;
+			break;
+
+
+		}
+		if(switch_info_v.switches.lindicator==0)
+			HAL_GPIO_WritePin(lindicator_c_GPIO_Port, lindicator_c_Pin,0);
+
+
+
+
+
+
+
+		//HAL_GPIO_TogglePin(lindicator_c_GPIO_Port, lindicator_c_Pin);
+
+		switch_info_v.switches.rindicator=HAL_GPIO_ReadPin(rindicator_GPIO_Port, rindicator_Pin)?0:1;
+		//			  HAL_GPIO_WritePin(rindicator_c_GPIO_Port, rindicator_c_Pin, switch_info_v.switches.rindicator);
+		while(switch_info_v.switches.rindicator)
+		{
+			while(count1<=0)
+			{
+
+				HAL_GPIO_TogglePin(rindicator_c_GPIO_Port, rindicator_c_Pin);
+
+
+				break;
+
+
+			}
+
+			if(count1==0)
+			{
+				count1=5;
+
+			}
+			count1--;
+			break;
+
+
+		}
+		if(switch_info_v.switches.rindicator==0)
+			HAL_GPIO_WritePin(rindicator_c_GPIO_Port, rindicator_c_Pin,0);
+
+
+
+
+		switch_info_v.switches.brake=HAL_GPIO_ReadPin(brake_GPIO_Port, brake_Pin)?0:1;//brake combo
+		HAL_GPIO_WritePin(brake_c_GPIO_Port, brake_c_Pin, switch_info_v.switches.brake);//brake light
+
+
+		switch_info_v.switches.brake=HAL_GPIO_ReadPin(brake_front_GPIO_Port, brake_front_Pin)?0:1;//brake_front
+		HAL_GPIO_WritePin(brake_c_GPIO_Port, brake_c_Pin, switch_info_v.switches.brake);//brake light
+
+		ig_cmd_v.ignitioncmdvar.ignition_signal=HAL_GPIO_ReadPin(ig_GPIO_Port, ig_Pin)?0:1;
+		if(ig_cmd_v.ignitioncmdvar.ignition_signal)
+			sendMsg_IGNITION_CMD(&igcmd);
+
+
+		//HAL_GPIO_WritePin(GPIOx, GPIO_Pin, PinState);
+
+		if(HAL_GPIO_ReadPin(keyin_GPIO_Port, keyin_Pin))
+		{
+
+			HAL_TIM_Base_Start_IT(&htim6);
+		}
+
+		switch_info.Mxe.Data[0]=switch_info_v.sw[0];
+		switch_info.Mxe.Data[1]=switch_info_v.sw[1];
+
+		sendMsg_SWITCHINFO(&switch_info);
+
+//		if(HAL_GPIO_ReadPin(ig_GPIO_Port,ig_Pin))
+//		{
+//
+//			controllerstatus.Mxe.Data[0]=controller_info_v.MotorcontrollerStatusvar[0];
+//			sendMsg_MOTORCONTROLLERSTATUS(&controllerstatus);//to all
+//
+//		}
+//
+//		igcmd.Mxe.Data[0]=ig_cmd_v.IGcmd;
+//		sendMsg_IGNITION_CMD(&igcmd);
+
+
+
+
+	}
+	else
+	{
+		if(!HAL_GPIO_ReadPin(keyin_GPIO_Port, keyin_Pin))
+		{
+			key_count_on=0;
+
+			HAL_TIM_Base_Start_IT(&htim6);
+
+		}
+
+	}
+	J1939_Poll();
+	HAL_Delay(100);
+
+	key_info_v.keys.Key_In=vechile_status;
+//	key_info_v.keys.Key_Off=!vechile_status;
+	key_info_v.keys.Dummy=1;
+
+	key_info.Mxe.Data[0]=key_info_v.key;
+	if(key_count_off<5)
+	{
+	sendMsg_KEYINFO(&key_info);
+	key_count_off++;
+
+	}
+	J1939_Poll();
+
+
+}

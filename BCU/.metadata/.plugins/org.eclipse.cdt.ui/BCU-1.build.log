@@ -1,0 +1,10 @@
+14:51:50 **** Incremental Build of configuration Debug for project BCU-1 ****
+make -j8 all 
+arm-none-eabi-size   BCU-1.elf 
+   text	   data	    bss	    dec	    hex	filename
+  19100	     20	   3056	  22176	   56a0	BCU-1.elf
+Finished building: default.size.stdout
+ 
+
+14:51:50 Build Finished. 0 errors, 0 warnings. (took 358ms)
+

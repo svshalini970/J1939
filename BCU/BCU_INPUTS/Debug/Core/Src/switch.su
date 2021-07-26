@@ -1,0 +1,6 @@
+switch.c:7:6:sendMsg_KEYINFO	48	static
+switch.c:24:6:sendMsg_MOTORCONTROLLERCOMMANDS	48	static
+switch.c:41:6:sendMsg_SWITCHINFO	48	static
+switch.c:57:6:sendMsg_BMSSTATUS	48	static
+switch.c:73:6:sendMsg_MOTORCONTROLLERSTATUS	48	static
+switch.c:98:6:switches_call	80	static

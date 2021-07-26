@@ -1,0 +1,87 @@
+# ifndef __switch_H
+#define __switch_H
+
+#include "J1939.H"
+#include "J1939_Config.H"
+#include <string.h>
+
+j1939_uint8_t _info;
+j1939_uint8_t _info1;
+J1939_MESSAGE switch_info;
+J1939_MESSAGE key_info;
+extern uint8_t vechile_status;
+uint8_t count;
+uint8_t count1;
+uint8_t key_count_on;
+uint8_t key_count_off;
+//extern TIM_HandleTypeDef htim6;
+union switch_info
+{
+	struct switches_d
+	{
+		uint8_t brake:1;
+		uint8_t hb:1;
+		uint8_t kill:1;
+		uint8_t lindicator:1;
+		uint8_t rindicator:1;
+		uint8_t ig:1;
+		uint8_t navb:1;
+		uint8_t navl:1;
+		uint8_t navm:1;
+		uint8_t navr:1;
+		uint8_t navt:1;
+		uint8_t reserved :5;
+	}switches;
+	uint8_t sw[2];
+}switch_info_v;
+
+union
+{
+	struct KeyInfo
+	{
+
+		j1939_uint8_t Dummy:1;
+		j1939_uint8_t Key_In:1;
+
+	}keys;
+	uint8_t key;
+
+}key_info_v;
+
+
+struct Motorcontrollercommand
+{
+	j1939_uint8_t ignition_command:2;
+	j1939_uint8_t brake:1;
+
+} Motorcontrollercmdvar;
+
+struct Ignitioncommand
+{
+	j1939_uint8_t ignition_signal:1;
+	j1939_uint8_t Dummy:1;
+
+} ignitioncmdvar;
+
+
+struct Motorcontroller_Status
+{
+	j1939_uint8_t Motor_OnOff_Status:1;
+	j1939_uint8_t MOTORCONTROLER_State:1;
+	j1939_uint8_t RIDEMODE_Status:1;
+	j1939_uint8_t ridemode_status:4;
+	j1939_uint16_t speed;
+	j1939_uint8_t startstop_status:1;
+
+}Motorcontroller_Statusvar;
+
+
+void sendMsg_KEYINFO(J1939_MESSAGE *Message);
+void sendMsg_SWITCHINFO(J1939_MESSAGE *Message);
+void sendMsg_MOTORCONTROLLERCOMMANDS(J1939_MESSAGE *Message);
+void sendMsg_IGNITION_CMD(J1939_MESSAGE *Message);
+
+
+
+
+# endif
